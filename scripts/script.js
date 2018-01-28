@@ -2,238 +2,218 @@ var canvas;
 var ctx;
 
 var gridW, gridH;
-var directions = Object.freeze({"up":0, "right":1, "down":2, "left":3})
-var snakeDirection;
-var nextSnakeDirection;
-var snakeLength;
+var numGridSectionsX, numGridSectionsY;
+var gameover, paused;
+
+var snakeDirection, nextSnakeDirection;
+var xSpeed, ySpeed;
 var bodySize = 20;
 var bodyInnerSize = 18;
 var bodyPositions = [];
-var speed;
-var xSpeed, ySpeed;
-var gameover;
-
 var food = [];
 
-function init(){
-	canvas = document.getElementById("canvas");
-	ctx = canvas.getContext("2d");
+var imageMoveX = 0;
+var imageContainer;
 
-	gridW = gridH = 20;
-	ctx.lineWidth = 2;
+const directions = Object.freeze({
+  "up": 0,
+  "right": 1,
+  "down": 2,
+  "left": 3
+});
 
-	food.splice(0, food.length);
-	bodyPositions.splice(0, bodyPositions.length);
-	bodyPositions.push([9, 10]);
-	bodyPositions.push([10, 10]);
-	bodyPositions.push([11, 10]);
-	bodyPositions.push([12, 10]);
+function init() {
+  canvas = document.getElementById("canvas");
+  ctx = canvas.getContext("2d");
 
-	snakeDirection = directions.right;
-	nextSnakeDirection = directions.right;
-	gameover = false;
+  imageContainer = document.getElementById("imageContainer");
+  imageContainer.style.position = "absolute";
 
-	spawnFood();
+  ctx.textAlign = "center";
+  ctx.lineWidth = 2;
+
+  gridW = gridH = 20;
+  numGridSectionsX = canvas.width / gridW;
+  numGridSectionsY = canvas.height / gridH;
+  gameover = false;
+  paused = false;
+
+  initSnake();
+  initFood();
 }
 
-function gameLoop(){
-  getInput();
+function initSnake() {
+  snakeDirection = directions.right;
+  nextSnakeDirection = directions.right;
+
+  bodyPositions.splice(0, bodyPositions.length);
+  bodyPositions.push([11, 11]);
+  bodyPositions.push([12, 11]);
+  bodyPositions.push([13, 11]);
+}
+
+function initFood() {
+  food.splice(0, food.length);
+  spawnFood();
+}
+
+function gameLoop() {
   update();
   draw();
 }
 
-function getInput(){
-  $(window).keypress(function(e) {
-    switch (e.which) {
-			case 97:
-				if(snakeDirection !== directions.right){
-					nextSnakeDirection = directions.left;
-				}
-				break;
-			case 119:
-				if(snakeDirection !== directions.down){
-					nextSnakeDirection = directions.up;
-				}
-				break;
-			case 100:
-				if(snakeDirection !== directions.left){
-					nextSnakeDirection = directions.right;
-				}
-				break;
-			case 115:
-				if(snakeDirection !== directions.up){
-					nextSnakeDirection = directions.down;
-				}
-				break;
-      case 32:
-			case 13:
-				if(gameover){
-					init();
-				}
-        break;
-      default: break;
-    }
-  });
-
-	$(window).keydown(function(e) {
-    switch (e.which) {
-			case 37:
-				if(snakeDirection !== directions.right){
-					nextSnakeDirection = directions.left;
-				}
-				break;
-			case 38:
-				if(snakeDirection !== directions.down){
-					nextSnakeDirection = directions.up;
-				}
-				break;
-			case 39:
-				if(snakeDirection !== directions.left){
-					nextSnakeDirection = directions.right;
-				}
-				break;
-			case 40:
-				if(snakeDirection !== directions.up){
-					nextSnakeDirection = directions.down;
-				}
-				break;
-			default: break;
-		}
-  });
-}
-
-function update(){
-	if(!gameover){
-		moveSnake();
-		collisionCheck();
-	}
+function update() {
+  if (!gameover && !paused) {
+    moveSnake();
+    collisionCheck();
+  }
 }
 
 function moveSnake() {
-	switch (nextSnakeDirection) {
-		case directions.up:
-			xSpeed = 0;		 	ySpeed = -1;     break;
-		case directions.right:
-			xSpeed = 1;	 		ySpeed = 0;      break;
-		case directions.down:
-			xSpeed = 0; 	 	ySpeed = 1;      break;
-		case directions.left:
-			xSpeed = -1;		ySpeed = 0;      break;
-		default:
-			break;
-	}
+  switch (nextSnakeDirection) {
+    case directions.up:
+      xSpeed = 0;
+      ySpeed = -1;
+      break;
+    case directions.right:
+      xSpeed = 1;
+      ySpeed = 0;
+      break;
+    case directions.down:
+      xSpeed = 0;
+      ySpeed = 1;
+      break;
+    case directions.left:
+      xSpeed = -1;
+      ySpeed = 0;
+      break;
+    default:
+      break;
+  }
 
-	snakeDirection = nextSnakeDirection;
-	let newHeadX = bodyPositions[bodyPositions.length - 1][0] + xSpeed;
-	let newHeadY = bodyPositions[bodyPositions.length - 1][1] + ySpeed;
-	bodyPositions.push([newHeadX, newHeadY]);
+  snakeDirection = nextSnakeDirection;
+  let newHeadX = bodyPositions[bodyPositions.length - 1][0] + xSpeed;
+  let newHeadY = bodyPositions[bodyPositions.length - 1][1] + ySpeed;
+  bodyPositions.push([newHeadX, newHeadY]);
 
-	if(!(bodyPositions[bodyPositions.length - 1][0] === food[0][0] &&
-		 bodyPositions[bodyPositions.length - 1][1] === food[0][1])) {
-			 bodyPositions.splice(0, 1);
-	 } else {
-		 food.splice(0, 1);
-		 spawnFood();
-	 }
+  if (!(bodyPositions[bodyPositions.length - 1][0] === food[0][0] &&
+      bodyPositions[bodyPositions.length - 1][1] === food[0][1])) {
+    bodyPositions.splice(0, 1);
+  } else {
+    spawnFood();
+  }
 }
 
 function collisionCheck() {
-	if(isOutOfBoundsX(bodyPositions[bodyPositions.length - 1][0]) ||
-		 isOutOfBoundsY(bodyPositions[bodyPositions.length - 1][1]) ||
-		 headEatsBody()) {
-		gameover = true;
-	}
+  if (isOutOfBoundsX(bodyPositions[bodyPositions.length - 1][0]) ||
+    isOutOfBoundsY(bodyPositions[bodyPositions.length - 1][1]) ||
+    headEatsBody()) {
+    gameover = true;
+  }
 }
 
 function isOutOfBoundsX(pos) {
-	if(pos === -1 || pos === 32){
-		return true;
-	}
+  if (pos === -1 || pos === numGridSectionsX) {
+    return true;
+  }
 
-	return false
+  return false
 }
 
 function isOutOfBoundsY(pos) {
-	if(pos === -1 || pos === 24){
-		return true;
-	}
+  if (pos === -1 || pos === numGridSectionsY) {
+    return true;
+  }
 
-	return false
+  return false
 }
 
 function spawnFood() {
-	let newX = Math.floor(Math.random() * 31);
-	let newY =  Math.floor(Math.random() * 23);
+  food.splice(0, food.length);
+  let newX = Math.floor(Math.random() * numGridSectionsX);
+  let newY = Math.floor(Math.random() * numGridSectionsY);
 
-	for(let i = 0; i < bodyPositions.length; i++){
-		if(newX === bodyPositions[i][0] && newY === bodyPositions[i][1])
-		spawnFood();
-		break;
-	}
+  for (let i = 0; i < bodyPositions.length; i++) {
+    if (newX === bodyPositions[i][0] && newY === bodyPositions[i][1]) {
+      newX = Math.floor(Math.random() * numGridSectionsX);
+      newY = Math.floor(Math.random() * numGridSectionsY);
+      i = 0;
+    }
+  }
 
-	food.push([newX, newY]);
+  food.push([newX, newY]);
+  return newX;
 }
 
 function headEatsBody() {
-	let headX = bodyPositions[bodyPositions.length - 1][0];
-	let headY = bodyPositions[bodyPositions.length - 1][1];
+  let headX = bodyPositions[bodyPositions.length - 1][0];
+  let headY = bodyPositions[bodyPositions.length - 1][1];
 
-	for(let i = 0; i < bodyPositions.length - 2; i++) {
-		if(headX === bodyPositions[i][0] && headY === bodyPositions[i][1]){
-			return true;
-		}
-	}
+  for (let i = 0; i < bodyPositions.length - 2; i++) {
+    if (headX === bodyPositions[i][0] && headY === bodyPositions[i][1]) {
+      return true;
+    }
+  }
 
-	return false;
+  return false;
 }
 
-function draw(){
-	clearCanvas();
-	drawSnake();
-	drawFood();
+function draw() {
+  clearCanvas();
+  drawSnake();
+  drawFood();
 
-	if(gameover) {
-		drawGameOverText();
-	}
+  if (gameover) {
+    drawGameOverText();
+  }
+
+  if (paused) {
+    drawPausedText();
+  }
 }
 
 function clearCanvas() {
-	ctx.clearRect(0,0,ctx.canvas.width,ctx.canvas.height);
-	ctx.beginPath();
+  ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+  ctx.beginPath();
 }
 
 function drawSnake() {
-	let snakeColour = "";
-	for(var i = 0; i < bodyPositions.length; i++){
-		if(i === bodyPositions.length - 1){
-			snakeColour = "#00FF33";
-		} else {
-			snakeColour = "#00AA00";
-		}
+  let snakeColour = "";
+  for (var i = 0; i < bodyPositions.length; i++) {
+    if (i === bodyPositions.length - 1) {
+      snakeColour = "#00FF33";
+    } else {
+      snakeColour = "#00AA00";
+    }
 
-		if(gameover){
-			snakeColour = "#882222";
-		}
+    if (gameover) {
+      snakeColour = "#882222";
+    }
 
-		drawSquare(bodyPositions[i][0] * gridW, bodyPositions[i][1] * gridH, snakeColour);
-	}
+    drawSquare(bodyPositions[i][0] * gridW, bodyPositions[i][1] * gridH, snakeColour);
+  }
 
-	redBodyCountIncFlag = false;
+  redBodyCountIncFlag = false;
 }
 
-function drawFood(){
-	for(var i = 0; i < food.length; i++) {
-		drawSquare(food[i][0] * gridW, food[i][1] * gridH, "#0044AA");
-	}
+function drawFood() {
+  for (var i = 0; i < food.length; i++) {
+    drawSquare(food[i][0] * gridW, food[i][1] * gridH, "#0044AA");
+  }
 }
 
-function drawSquare(x, y, colour){
-	roundRect(x, y, bodySize, bodySize, 3, colour);
+function drawSquare(x, y, colour) {
+  roundRect(x, y, bodySize, bodySize, 3, colour);
 }
 
 function roundRect(x, y, width, height, radius, colour) {
-  radius = {tl: radius, tr: radius, br: radius, bl: radius};
-	ctx.fillStyle = colour;
+  radius = {
+    tl: radius,
+    tr: radius,
+    br: radius,
+    bl: radius
+  };
+  ctx.fillStyle = colour;
 
   ctx.beginPath();
   ctx.moveTo(x + radius.tl, y);
@@ -252,15 +232,92 @@ function roundRect(x, y, width, height, radius, colour) {
 }
 
 function drawGameOverText() {
-	ctx.font = "30px Verdana";
-	ctx.textAlign = "center";
-	ctx.fillStyle = "#ff0000";
-	ctx.fillText("Game Over :(", canvas.width/2, canvas.height/2);
-	ctx.font = "20px Verdana";
-	ctx.fillText("Press enter or space to restart.", canvas.width/2, canvas.height/2 + 30);
+  ctx.font = "30px Verdana";
+  ctx.fillStyle = "#989800";
+  ctx.fillText("Game Over :(", canvas.width / 2, canvas.height / 2);
+  ctx.font = "20px Verdana";
+  ctx.fillText("Press enter or space to restart.", canvas.width / 2, canvas.height / 2 + 30);
 }
 
-$( document ).ready(function() {
-	init();
-	setInterval(gameLoop, 200);
+function drawPausedText() {
+  ctx.font = "30px Verdana";
+  ctx.fillStyle = "#989800";
+  ctx.fillText("Paused.", canvas.width / 2, canvas.height / 2);
+  ctx.font = "20px Verdana";
+  ctx.fillText("Press enter or space to resume.", canvas.width / 2, canvas.height / 2 + 30);
+}
+
+function moveImageContainer(xPos, yPos) {
+  imageContainer.style.left = xPos + 'px';
+  imageContainer.style.top = yPos + 'px';
+}
+
+$(document).ready(function() {
+  init();
+  setInterval(gameLoop, 200);
 });
+
+$(window).keypress(function(e) {
+  switch (e.which) {
+    case 97:
+      if (snakeDirection !== directions.right) {
+        nextSnakeDirection = directions.left;
+      }
+      break;
+    case 119:
+      if (snakeDirection !== directions.down) {
+        nextSnakeDirection = directions.up;
+      }
+      break;
+    case 100:
+      if (snakeDirection !== directions.left) {
+        nextSnakeDirection = directions.right;
+      }
+      break;
+    case 115:
+      if (snakeDirection !== directions.up) {
+        nextSnakeDirection = directions.down;
+      }
+      break;
+    case 32:
+    case 13:
+      paused = !paused;
+      if (gameover) {
+        init();
+      }
+      break;
+    default:
+      break;
+  }
+});
+
+$(window).keydown(function(e) {
+  switch (e.which) {
+    case 37:
+      if (snakeDirection !== directions.right) {
+        nextSnakeDirection = directions.left;
+      }
+      break;
+    case 38:
+      if (snakeDirection !== directions.down) {
+        nextSnakeDirection = directions.up;
+      }
+      break;
+    case 39:
+      if (snakeDirection !== directions.left) {
+        nextSnakeDirection = directions.right;
+      }
+      break;
+    case 40:
+      if (snakeDirection !== directions.up) {
+        nextSnakeDirection = directions.down;
+      }
+      break;
+    default:
+      break;
+  }
+});
+
+if (typeof module !== 'undefined' && module.hasOwnProperty('exports')) {
+  module.exports = Game;
+}
