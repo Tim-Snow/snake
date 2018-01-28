@@ -26,9 +26,6 @@ function init() {
   canvas = document.getElementById("canvas");
   ctx = canvas.getContext("2d");
 
-  imageContainer = document.getElementById("imageContainer");
-  imageContainer.style.position = "absolute";
-
   ctx.textAlign = "center";
   ctx.lineWidth = 2;
 
@@ -245,11 +242,6 @@ function drawPausedText() {
   ctx.fillText("Paused.", canvas.width / 2, canvas.height / 2);
   ctx.font = "20px Verdana";
   ctx.fillText("Press enter or space to resume.", canvas.width / 2, canvas.height / 2 + 30);
-}
-
-function moveImageContainer(xPos, yPos) {
-  imageContainer.style.left = xPos + 'px';
-  imageContainer.style.top = yPos + 'px';
 }
 
 $(document).ready(function() {
