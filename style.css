@@ -1,0 +1,16 @@
+h1, p, td, th {
+  text-align: center;
+  font-family: verdana;
+  padding-right: 10px;
+  padding-left: 10px;
+}
+
+.leftAlign {
+  text-align: left;
+  width: 150px;
+}
+
+.rightAlign {
+  text-align: right;
+  width: 150px;
+}
