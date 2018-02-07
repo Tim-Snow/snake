@@ -4,6 +4,7 @@ var ctx;
 var gridW, gridH;
 var numGridSectionsX, numGridSectionsY;
 var gameover, paused;
+var started = false;
 
 var snakeDirection, nextSnakeDirection;
 var xSpeed, ySpeed;
@@ -32,8 +33,8 @@ function init() {
   gridW = gridH = 20;
   numGridSectionsX = canvas.width / gridW;
   numGridSectionsY = canvas.height / gridH;
-  gameover = false;
-  paused = false;
+
+  gameover = paused = false;
 
   initSnake();
   initFood();
@@ -60,7 +61,7 @@ function gameLoop() {
 }
 
 function update() {
-  if (!gameover && !paused) {
+  if (!gameover && !paused && started) {
     moveSnake();
     collisionCheck();
   }
@@ -167,6 +168,10 @@ function draw() {
   if (paused) {
     drawPausedText();
   }
+
+  if (!started) {
+    drawStartText();
+  }
 }
 
 function clearCanvas() {
@@ -244,6 +249,14 @@ function drawPausedText() {
   ctx.fillText("Press enter or space to resume.", canvas.width / 2, canvas.height / 2 + 30);
 }
 
+function drawStartText() {
+  ctx.font = "30px Verdana";
+  ctx.fillStyle = "#989800";
+  ctx.fillText("Snake!", canvas.width / 2, canvas.height / 2);
+  ctx.font = "20px Verdana";
+  ctx.fillText("Press enter or space to start.", canvas.width / 2, canvas.height / 2 + 30);
+}
+
 $(document).ready(function() {
   init();
   setInterval(gameLoop, 200);
@@ -273,7 +286,12 @@ $(window).keypress(function(e) {
       break;
     case 32:
     case 13:
-      paused = !paused;
+      if(!started){
+        started = true;
+      } else {
+        paused = !paused;
+      }
+
       if (gameover) {
         init();
       }
