@@ -1,5 +1,3 @@
-// import $ from 'jquery'
-
 var canvas
 var ctx
 
