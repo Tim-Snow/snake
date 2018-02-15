@@ -1,0 +1,26 @@
+{
+  "name": "snake",
+  "version": "1.0.0",
+  "description": "",
+  "main": "scripts/game.js",
+  "scripts": {
+    "build": "steal-tools"
+  },
+  "steal": {
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Tim-Snow/Snake.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Tim-Snow/Snake/issues"
+  },
+  "homepage": "https://github.com/Tim-Snow/Snake#readme",
+  "devDependencies": {
+    "jquery": "^3.3.1",
+    "steal": "^1.6.5",
+    "steal-tools": "^1.11.3"
+  }
+}

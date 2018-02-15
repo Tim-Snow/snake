@@ -1,3 +1,5 @@
+import $ from "jquery";
+
 var canvas;
 var ctx;
 
@@ -21,6 +23,11 @@ const directions = Object.freeze({
   "right": 1,
   "down": 2,
   "left": 3
+});
+
+$(document).ready(function() {
+  init();
+  setInterval(gameLoop, 200);
 });
 
 function init() {
@@ -194,8 +201,6 @@ function drawSnake() {
 
     drawSquare(bodyPositions[i][0] * gridW, bodyPositions[i][1] * gridH, snakeColour);
   }
-
-  redBodyCountIncFlag = false;
 }
 
 function drawFood() {
@@ -256,11 +261,6 @@ function drawStartText() {
   ctx.font = "20px Verdana";
   ctx.fillText("Press enter or space to start.", canvas.width / 2, canvas.height / 2 + 30);
 }
-
-$(document).ready(function() {
-  init();
-  setInterval(gameLoop, 200);
-});
 
 $(window).keypress(function(e) {
   switch (e.which) {
@@ -327,7 +327,3 @@ $(window).keydown(function(e) {
       break;
   }
 });
-
-if (typeof module !== 'undefined' && module.hasOwnProperty('exports')) {
-  module.exports = Game;
-}
