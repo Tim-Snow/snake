@@ -1,5 +1,9 @@
 resources/
 *.swp
 node_modules/
+<<<<<<< HEAD
 dist/
 *~
+=======
+*.*~
+>>>>>>> Prod build fixed for deploying
