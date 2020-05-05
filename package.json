@@ -18,6 +18,6 @@
   },
   "homepage": "https://github.com/Tim-Snow/Snake#readme",
   "devDependencies": {
-    "http-server": "0.11.1"
+    "http-server": "^0.12.3"
   }
 }
