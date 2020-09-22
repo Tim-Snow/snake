@@ -4,7 +4,7 @@
   "description": "",
   "main": "index.html",
   "scripts": {
-    "start": "http-server"
+    "start": "serve"
   },
   "repository": {
     "type": "git",
@@ -17,6 +17,6 @@
   },
   "homepage": "https://github.com/Tim-Snow/Snake#readme",
   "devDependencies": {
-    "http-server": "^0.12.3"
+    "serve": "^11.3.2"
   }
 }
